@@ -1,144 +1,83 @@
 import React from 'react';
-import { circles } from '../models/circles';
 import Circle from './Circle';
 import { View, Text, StyleSheet } from 'react-native';
+import { CircleData } from '../entities/Circle';
+import SequenceManagerEntity from '../entities/SequenceManager';
+import { SequenceManager } from '../models/SequenceManager';
+import AssetManager from '../models/AssetManager';
 
 type GameState = 'remember' | 'repeat' | 'home' | 'end';
 
 interface State {
   gameState: GameState;
-  sequience: string[];
-  highlight: string;
-  loading: number;
+  circles: CircleData[];
 }
 
 export default class Game extends React.Component<{}, State> {
-  colors = Object.keys(circles);
-  deselectTimer = setTimeout(() => {});
-  guessIndex = 0;
+  assets = new AssetManager();
+
+  circleData = Object.keys(this.assets.empty).map(key => ({
+    color: key,
+    selected: false
+  }));
+
+  seq: SequenceManagerEntity = new SequenceManager(this.circleData);
+
   constructor(props: {}) {
     super(props);
 
     this.state = {
       gameState: 'remember',
-      sequience: [],
-      highlight: '',
-      loading: 0
+      circles: this.circleData
     };
-
-    this.deselect = this.deselect.bind(this);
-    this.onCircleLoad = this.onCircleLoad.bind(this);
-    this.onCircleClick = this.onCircleClick.bind(this);
   }
 
-  onLoaded() {
+  componentDidMount() {
     this.init();
-    this.changeMode('remember');
   }
 
   init() {
-    this.setState({ sequience: [this.random(), this.random()] }, () => {
-      this.play();
-    });
+    this.seq.init();
+    this.seq.eachWithInterval(2000, this.select.bind(this));
   }
 
-  play(ind: number = 0) {
-    const playNext = () => {
-      ind < this.state.sequience.length - 1
-        ? this.play(ind + 1)
-        : this.changeMode('repeat');
-    };
-
-    this.setState({ highlight: this.state.sequience[ind] }, () => {
-      setTimeout(() => {
-        this.deselect();
-        setTimeout(() => {
-          playNext();
-        }, 500);
-      }, 500);
-    });
+  nextLevel() {
+	this.seq.add();
+    this.seq.eachWithInterval(2000, this.select.bind(this));
   }
 
-  deselect() {
-    this.setState({ highlight: '' });
+  select(color: string) {
+    this.setState(state => ({
+      circles: [
+        ...state.circles.map(el =>
+          el.color === color
+            ? { ...el, selected: true }
+            : { ...el, selected: false }
+        )
+      ]
+    }));
   }
 
-  changeMode(mode: GameState) {
-    this.setState({ gameState: mode, highlight: '' });
-
-    switch (mode) {
-      case 'repeat':
-        this.guessIndex = 0;
-        break;
-      case 'remember':
-        clearTimeout(this.deselectTimer);
-        this.play();
-        break;
-    }
+  deselectAll() {
+    this.setState(state => ({
+      circles: [...state.circles.map(el => ({ ...el, selected: false }))]
+    }));
   }
 
-  nextWave() {
-    this.add();
-    this.changeMode('remember');
-  }
-
-  add() {
-    this.setState(state => {
-      return { sequience: [...state.sequience, this.random()] };
-    });
-  }
-
-  random() {
-    return this.colors[Math.floor(Math.random() * this.colors.length)];
-  }
-
-  onCircleLoad() {
-    this.setState({ loading: this.state.loading + 1 }, () => {
-      if (this.state.loading === this.colors.length) {
-        this.onLoaded();
-      }
-    });
-  }
-
-  onCircleClick(color: string) {
-    if (this.state.gameState === 'repeat') {
-      if (color === this.state.sequience[this.guessIndex]) {
-        this.selectCircle(color);
-      } else {
-        this.changeMode('end');
-      }
-    }
-
-    if (this.state.gameState === 'end') {
-      this.init();
-      this.changeMode('remember');
-    }
-  }
-
-  selectCircle(color: string) {
-    this.deselect();
-    clearTimeout(this.deselectTimer);
-    this.setState({ highlight: color }, () => {
-      this.deselectTimer = setTimeout( () => {
-        this.deselect();
-        this.guessIndex < this.state.sequience.length - 1
-          ? this.guessIndex++
-          : this.nextWave();
-      }, 500);
-    });
+  restartGame() {
+    this.nextLevel();
   }
 
   render() {
     return (
       <View>
         <Text style={styles.text}>{this.state.gameState}</Text>
-        {this.colors.map(color => (
+        {this.state.circles.map(circle => (
           <Circle
-            color={color}
-            key={color}
-            full={this.state.highlight === color}
-            onLoaded={this.onCircleLoad}
-            onClick={this.onCircleClick}
+            color={circle.color}
+            key={circle.color}
+            full={circle.selected}
+            onClick={this.restartGame.bind(this)}
           />
         ))}
       </View>
@@ -149,5 +88,5 @@ export default class Game extends React.Component<{}, State> {
 const styles = StyleSheet.create({
   text: {
     color: 'white'
-  },
+  }
 });
