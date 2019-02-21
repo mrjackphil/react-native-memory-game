@@ -33,17 +33,33 @@ export default class Game extends React.Component<{}, State> {
   }
 
   componentDidMount() {
-    this.init();
+    this.startGame();
   }
 
-  init() {
+  startGame() {
+    this.setState({ gameState: 'remember' });
     this.seq.init();
-    this.seq.eachWithInterval(2000, this.select.bind(this));
+    this.show();
+  }
+
+  show() {
+    this.seq.eachWithInterval(
+      2000,
+      this.select.bind(this),
+      this.playerTurn.bind(this)
+    );
   }
 
   nextLevel() {
-	this.seq.add();
-    this.seq.eachWithInterval(2000, this.select.bind(this));
+    this.deselect();
+    this.setState({ gameState: 'remember' });
+    this.seq.add();
+    this.show();
+  }
+
+  playerTurn() {
+    this.deselect();
+    this.setState({ gameState: 'repeat' });
   }
 
   select(color: string) {
@@ -58,14 +74,26 @@ export default class Game extends React.Component<{}, State> {
     }));
   }
 
-  deselectAll() {
+  deselect() {
     this.setState(state => ({
       circles: [...state.circles.map(el => ({ ...el, selected: false }))]
     }));
   }
 
-  restartGame() {
-    this.nextLevel();
+  onCircleClick(color: string) {
+    if (this.state.gameState === 'repeat') {
+      const result = this.seq.check(color);
+      switch (result) {
+        case 'end':
+          this.nextLevel();
+          break;
+        case false:
+          this.setState({ gameState: 'end' });
+          break;
+      }
+    }
+
+    this.state.gameState === 'end' && this.startGame();
   }
 
   render() {
@@ -77,7 +105,7 @@ export default class Game extends React.Component<{}, State> {
             color={circle.color}
             key={circle.color}
             full={circle.selected}
-            onClick={this.restartGame.bind(this)}
+            onClick={this.onCircleClick.bind(this)}
           />
         ))}
       </View>
