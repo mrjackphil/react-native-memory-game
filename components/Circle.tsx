@@ -29,7 +29,7 @@ export default class Circle extends React.Component<Props, State> {
   }
 
   onHandleClick = () => {
-    this.props.onClick ? this.props.onClick() : {};
+    this.props.onClick ? this.props.onClick(this.props.color) : {};
   };
 
   get fadeStart() {
