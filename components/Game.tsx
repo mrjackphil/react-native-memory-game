@@ -99,7 +99,7 @@ export default class Game extends React.Component<{}, State> {
   render() {
     return (
       <View style={styles.base}>
-        <Text style={styles.text}>{this.state.gameState}</Text>
+        <Text style={styles.text}>{texts.en[this.state.gameState]}</Text>
         <View style={styles.circle}>
           {this.state.circles.map((circle, i) => (
             <Circle
@@ -136,3 +136,11 @@ const styles = StyleSheet.create({
     position: 'relative'
   }
 });
+
+const texts: { en: { [key: string]: string } } = {
+  en: {
+    remember: 'Remember the sequence',
+    repeat: 'Repeat the sequence',
+    end: 'Game over. Press on any circle to continue.'
+  }
+};
