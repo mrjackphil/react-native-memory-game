@@ -4,6 +4,7 @@ import { StyleSheet, Animated, TouchableWithoutFeedback } from 'react-native';
 interface Props {
   color: string;
   full: boolean;
+  index: number;
   active?: boolean;
   onClick?: Function;
 }
@@ -66,6 +67,11 @@ export default class Circle extends React.Component<Props, State> {
         onPressOut={() => this.setState({ touch: false })}
       >
         <Animated.View
+          transform={[
+            { rotateZ: `${this.props.index * 60}deg` },
+            { translateY: -100 },
+            { rotateZ: `-${this.props.index * 60}deg` },
+          ]}
           style={[
             styles.circle,
             { borderColor: color },
@@ -85,12 +91,15 @@ export default class Circle extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   circle: {
-    margin: 2,
+    margin: -30,
     padding: 2,
     width: 60,
     height: 60,
     borderWidth: 4,
     borderStyle: 'solid',
-    borderRadius: 50
+    borderRadius: 50,
+    position: 'absolute',
+    top: '50%',
+    left: '50%'
   }
 });

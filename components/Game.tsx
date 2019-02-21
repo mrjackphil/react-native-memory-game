@@ -98,24 +98,41 @@ export default class Game extends React.Component<{}, State> {
 
   render() {
     return (
-      <View>
+      <View style={styles.base}>
         <Text style={styles.text}>{this.state.gameState}</Text>
-        {this.state.circles.map(circle => (
-          <Circle
-            color={circle.color}
-            key={circle.color}
-			full={circle.selected}
-			active={this.state.gameState === 'repeat'}
-            onClick={this.onCircleClick.bind(this)}
-          />
-        ))}
+        <View style={styles.circle}>
+          {this.state.circles.map((circle, i) => (
+            <Circle
+              color={circle.color}
+              key={circle.color}
+              index={i}
+              full={circle.selected}
+              active={this.state.gameState === 'repeat'}
+              onClick={this.onCircleClick.bind(this)}
+            />
+          ))}
+        </View>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  base: {
+    alignItems: 'center'
+  },
   text: {
-    color: 'white'
+	color: 'white',
+	marginBottom: 20
+  },
+  circle: {
+    margin: 30,
+    width: 200,
+    height: 200,
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderRadius: 50,
+    alignItems: 'center',
+    position: 'relative'
   }
 });
