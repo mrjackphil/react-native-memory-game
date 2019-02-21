@@ -1,14 +1,16 @@
 import React from 'react';
-import { StyleSheet, TouchableHighlight, Animated } from 'react-native';
+import { StyleSheet, Animated, TouchableWithoutFeedback } from 'react-native';
 
 interface Props {
   color: string;
   full: boolean;
+  active?: boolean;
   onClick?: Function;
 }
 
 interface State {
   fade: Animated.Value;
+  touch: boolean;
 }
 
 export default class Circle extends React.Component<Props, State> {
@@ -24,7 +26,8 @@ export default class Circle extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      fade: new Animated.Value(0)
+      fade: new Animated.Value(0),
+      touch: false
     };
   }
 
@@ -54,27 +57,38 @@ export default class Circle extends React.Component<Props, State> {
       ]
     });
 
+    const color = `rgb(${this.rgb[this.props.color]})`;
+
     return (
-      <TouchableHighlight onPress={this.onHandleClick}>
+      <TouchableWithoutFeedback
+        onPress={this.onHandleClick}
+        onPressIn={() => this.setState({ touch: true })}
+        onPressOut={() => this.setState({ touch: false })}
+      >
         <Animated.View
           style={[
             styles.circle,
-            { borderColor: `rgb(${this.rgb[this.props.color]})` },
+            { borderColor: color },
+            !this.props.full &&
+              this.props.active &&
+              this.state.touch && { backgroundColor: color },
             this.props.full &&
               this.fadeStart && {
                 backgroundColor: backgroundColor
               }
           ]}
         />
-      </TouchableHighlight>
+      </TouchableWithoutFeedback>
     );
   }
 }
 
 const styles = StyleSheet.create({
   circle: {
-    width: 40,
-    height: 40,
+    margin: 2,
+    padding: 2,
+    width: 60,
+    height: 60,
     borderWidth: 4,
     borderStyle: 'solid',
     borderRadius: 50

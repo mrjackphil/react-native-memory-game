@@ -104,7 +104,8 @@ export default class Game extends React.Component<{}, State> {
           <Circle
             color={circle.color}
             key={circle.color}
-            full={circle.selected}
+			full={circle.selected}
+			active={this.state.gameState === 'repeat'}
             onClick={this.onCircleClick.bind(this)}
           />
         ))}
