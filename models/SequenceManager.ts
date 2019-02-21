@@ -5,7 +5,7 @@ interface Config {
   count: number;
 }
 
-export class SequenceManager implements SequenceManagerEntity {
+export default class SequenceManager implements SequenceManagerEntity {
   private obj: CircleData[];
   private config: Config;
   private checker: SequenceChecker;

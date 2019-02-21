@@ -1,10 +1,13 @@
 import React from 'react';
-import Circle from './Circle';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+// Entities
 import { CircleData } from '../entities/Circle';
 import SequenceManagerEntity from '../entities/SequenceManager';
-import { SequenceManager } from '../models/SequenceManager';
+// Models
+import SequenceManager from '../models/SequenceManager';
 import AssetManager from '../models/AssetManager';
+// Components
+import Circle from './Circle';
 
 type GameState = 'remember' | 'repeat' | 'home' | 'end';
 
@@ -33,7 +36,11 @@ export default class Game extends React.Component<{}, State> {
   }
 
   componentDidMount() {
-    this.startGame();
+    this.init();
+  }
+
+  init() {
+    this.setState({ gameState: 'home' });
   }
 
   startGame() {
@@ -99,19 +106,28 @@ export default class Game extends React.Component<{}, State> {
   render() {
     return (
       <View style={styles.base}>
-        <Text style={styles.text}>{texts.en[this.state.gameState]}</Text>
-        <View style={styles.circle}>
-          {this.state.circles.map((circle, i) => (
-            <Circle
-              color={circle.color}
-              key={circle.color}
-              index={i}
-              full={circle.selected}
-              active={this.state.gameState === 'repeat'}
-              onClick={this.onCircleClick.bind(this)}
-            />
-          ))}
-        </View>
+        <Text style={styles.text}>{texts.title[this.state.gameState]}</Text>
+        {['home', 'end'].filter(s => s === this.state.gameState).length > 0 && (
+          <Button
+            title={texts.button[this.state.gameState]}
+            onPress={this.startGame.bind(this)}
+          />
+        )}
+        {['repeat', 'remember'].filter(s => s === this.state.gameState).length >
+          0 && (
+          <View style={styles.circle}>
+            {this.state.circles.map((circle, i) => (
+              <Circle
+                color={circle.color}
+                key={circle.color}
+                index={i}
+                full={circle.selected}
+                active={this.state.gameState === 'repeat'}
+                onClick={this.onCircleClick.bind(this)}
+              />
+            ))}
+          </View>
+        )}
       </View>
     );
   }
@@ -122,8 +138,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   text: {
-	color: 'white',
-	marginBottom: 20
+    color: 'white',
+    marginBottom: 20
   },
   circle: {
     margin: 30,
@@ -137,10 +153,18 @@ const styles = StyleSheet.create({
   }
 });
 
-const texts: { en: { [key: string]: string } } = {
-  en: {
+const texts: {
+  title: { [key: string]: string };
+  button: { [key: string]: string };
+} = {
+  title: {
+    home: 'Memory game',
     remember: 'Remember the sequence',
     repeat: 'Repeat the sequence',
-    end: 'Game over. Press on any circle to continue.'
+    end: 'Game over.'
+  },
+  button: {
+    home: 'Start game',
+    end: 'Play again'
   }
 };
