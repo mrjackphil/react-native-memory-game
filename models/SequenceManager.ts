@@ -8,11 +8,13 @@ interface Config {
 export class SequenceManager implements SequenceManagerEntity {
   private obj: CircleData[];
   private config: Config;
+  private checker: SequenceChecker;
   public seq: string[];
   constructor(obj: CircleData[], config?: Config) {
     this.obj = obj;
     this.seq = [];
     this.config = config || { count: 2 };
+    this.checker = new SequenceChecker(this.seq);
   }
 
   /**
@@ -36,7 +38,7 @@ export class SequenceManager implements SequenceManagerEntity {
     this.seq = [];
   }
 
-  eachWithInterval(timeout: number, callback: Function) {
+  public eachWithInterval(timeout: number, callback: Function, end?: Function) {
     let seq = this.seq;
     const interval = setInterval(() => {
       if (seq.length) {
@@ -44,7 +46,61 @@ export class SequenceManager implements SequenceManagerEntity {
         seq = seq.slice(1, seq.length);
       } else {
         clearInterval(interval);
+        end && end();
       }
     }, timeout);
+  }
+
+  public check(input: string) {
+    return this.checker.check(input, this.seq);
+  }
+}
+
+class SequenceChecker {
+  seq: string[];
+  checkIndex: number;
+  status: 'start' | 'progress' | 'end' | false;
+  constructor(seq: string[]) {
+    this.seq = seq;
+    this.checkIndex = 0;
+    this.status = false;
+  }
+
+  private unvalid() {
+    this.checkIndex = 0;
+    this.status = false;
+  }
+
+  private valid() {
+    this.checkIndex++;
+  }
+
+  private statusHandler() {
+    if (this.status === false) {
+      return;
+    }
+
+    if (this.checkIndex === 0) {
+      this.status = 'start';
+    }
+
+    if (this.checkIndex > 0 && this.checkIndex < this.seq.length) {
+      this.status = 'progress';
+    }
+
+    if (this.checkIndex === this.seq.length) {
+      this.checkIndex = 0;
+      this.status = 'end';
+    }
+  }
+
+  public check(input: string, seq?: string[]) {
+    this.status === false && (this.status = 'start');
+    seq && (this.seq = seq);
+    input === this.seq[this.checkIndex] ? this.valid() : this.unvalid();
+
+    this.statusHandler();
+
+    return this.status;
   }
 }
