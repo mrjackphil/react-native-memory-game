@@ -14,6 +14,7 @@ type GameState = 'remember' | 'repeat' | 'home' | 'end';
 interface State {
   gameState: GameState;
   circles: CircleData[];
+  guessCount: number;
 }
 
 export default class Game extends React.Component<{}, State> {
@@ -31,7 +32,8 @@ export default class Game extends React.Component<{}, State> {
 
     this.state = {
       gameState: 'remember',
-      circles: this.circleData
+	  circles: this.circleData,
+	  guessCount: this.seq.countToGuess
     };
   }
 
@@ -87,9 +89,14 @@ export default class Game extends React.Component<{}, State> {
     }));
   }
 
+  updateGuessCount() {
+	this.setState({guessCount: this.seq.countToGuess});
+  }
+
   onCircleClick(color: string) {
     if (this.state.gameState === 'repeat') {
-      const result = this.seq.check(color);
+	  const result = this.seq.check(color);
+	  this.updateGuessCount();
       switch (result) {
         case 'end':
           this.nextLevel();
@@ -116,6 +123,11 @@ export default class Game extends React.Component<{}, State> {
         {['repeat', 'remember'].filter(s => s === this.state.gameState).length >
           0 && (
           <View style={styles.circle}>
+            <Text style={[styles.text, styles.big]}>
+              {this.state.gameState === 'remember'
+                ? this.seq.seq.length
+                : this.seq.countToGuess}
+            </Text>
             {this.state.circles.map((circle, i) => (
               <Circle
                 color={circle.color}
@@ -150,6 +162,11 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     position: 'relative'
+  },
+  big: {
+    fontSize: 20,
+    top: '50%',
+    marginTop: -10
   }
 });
 

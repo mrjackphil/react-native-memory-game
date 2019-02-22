@@ -36,4 +36,9 @@ export default class SequenceManagerEntity {
    */
   public check: (color: string) => 'start' | 'progress' | 'end' | false = this
     .check;
+
+  /**
+   * Count need to guess
+   */
+  public countToGuess: number = this.countToGuess;
 }

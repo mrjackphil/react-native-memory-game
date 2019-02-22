@@ -14,7 +14,7 @@ export default class SequenceManager implements SequenceManagerEntity {
     this.obj = obj;
     this.seq = [];
     this.config = config || { count: 2 };
-    this.checker = new SequenceChecker(this.seq);
+	this.checker = new SequenceChecker(this.seq);
   }
 
   /**
@@ -53,6 +53,10 @@ export default class SequenceManager implements SequenceManagerEntity {
 
   public check(input: string) {
     return this.checker.check(input, this.seq);
+  }
+
+  public get countToGuess() {
+	return this.seq.length - this.checker.checkIndex;
   }
 }
 
