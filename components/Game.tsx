@@ -15,6 +15,7 @@ interface State {
   gameState: GameState;
   circles: CircleData[];
   guessCount: number;
+  score: number;
 }
 
 export default class Game extends React.Component<{}, State> {
@@ -33,7 +34,8 @@ export default class Game extends React.Component<{}, State> {
     this.state = {
       gameState: 'remember',
       circles: this.circleData,
-      guessCount: this.seq.countToGuess
+      guessCount: this.seq.countToGuess,
+      score: 0
     };
   }
 
@@ -46,6 +48,7 @@ export default class Game extends React.Component<{}, State> {
   }
 
   startGame() {
+    this.setState({ score: 0 });
     this.setState({ gameState: 'remember' });
     this.seq.init();
     this.show();
@@ -100,10 +103,14 @@ export default class Game extends React.Component<{}, State> {
       this.updateGuessCount();
       switch (result) {
         case 'end':
+          this.setState({ score: this.state.score + 1 });
           this.nextLevel();
           break;
         case false:
           this.setState({ gameState: 'end' });
+          break;
+        default:
+          this.setState({ score: this.state.score + 1 });
           break;
       }
     }
@@ -112,11 +119,14 @@ export default class Game extends React.Component<{}, State> {
   }
 
   render() {
-    const { guessCount, gameState, circles } = this.state;
+    const { guessCount, gameState, circles, score } = this.state;
     const { seq, startGame, onCircleClick } = this;
     return (
       <View style={styles.base}>
         <Text style={styles.text}>{texts.title[gameState]}</Text>
+        {gameState === 'end' && (
+          <Text style={styles.text}>Your score: {score}</Text>
+        )}
         {['home', 'end'].filter(s => s === gameState).length > 0 && (
           <Button
             title={texts.button[gameState]}
