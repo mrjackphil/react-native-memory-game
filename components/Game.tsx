@@ -32,8 +32,8 @@ export default class Game extends React.Component<{}, State> {
 
     this.state = {
       gameState: 'remember',
-	  circles: this.circleData,
-	  guessCount: this.seq.countToGuess
+      circles: this.circleData,
+      guessCount: this.seq.countToGuess
     };
   }
 
@@ -68,6 +68,7 @@ export default class Game extends React.Component<{}, State> {
 
   playerTurn() {
     this.deselect();
+    this.updateGuessCount();
     this.setState({ gameState: 'repeat' });
   }
 
@@ -90,13 +91,13 @@ export default class Game extends React.Component<{}, State> {
   }
 
   updateGuessCount() {
-	this.setState({guessCount: this.seq.countToGuess});
+    this.setState({ guessCount: this.seq.countToGuess });
   }
 
   onCircleClick(color: string) {
     if (this.state.gameState === 'repeat') {
-	  const result = this.seq.check(color);
-	  this.updateGuessCount();
+      const result = this.seq.check(color);
+      this.updateGuessCount();
       switch (result) {
         case 'end':
           this.nextLevel();
@@ -111,31 +112,30 @@ export default class Game extends React.Component<{}, State> {
   }
 
   render() {
+    const { guessCount, gameState, circles } = this.state;
+    const { seq, startGame, onCircleClick } = this;
     return (
       <View style={styles.base}>
-        <Text style={styles.text}>{texts.title[this.state.gameState]}</Text>
-        {['home', 'end'].filter(s => s === this.state.gameState).length > 0 && (
+        <Text style={styles.text}>{texts.title[gameState]}</Text>
+        {['home', 'end'].filter(s => s === gameState).length > 0 && (
           <Button
-            title={texts.button[this.state.gameState]}
-            onPress={this.startGame.bind(this)}
+            title={texts.button[gameState]}
+            onPress={startGame.bind(this)}
           />
         )}
-        {['repeat', 'remember'].filter(s => s === this.state.gameState).length >
-          0 && (
+        {['repeat', 'remember'].filter(s => s === gameState).length > 0 && (
           <View style={styles.circle}>
             <Text style={[styles.text, styles.big]}>
-              {this.state.gameState === 'remember'
-                ? this.seq.seq.length
-                : this.seq.countToGuess}
+              {gameState === 'remember' ? seq.seq.length : guessCount}
             </Text>
-            {this.state.circles.map((circle, i) => (
+            {circles.map((circle, i) => (
               <Circle
                 color={circle.color}
                 key={circle.color}
                 index={i}
                 full={circle.selected}
-                active={this.state.gameState === 'repeat'}
-                onClick={this.onCircleClick.bind(this)}
+                active={gameState === 'repeat'}
+                onClick={onCircleClick.bind(this)}
               />
             ))}
           </View>
